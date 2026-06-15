@@ -21,6 +21,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -331,9 +332,17 @@ class XPSPageContentHandler extends DefaultHandler {
         if (urls.size() > 0) {
             xhml.startElement(DIV, CLASS, URL_DIV);
             for (String u : urls) {
-                xhml.startElement(A, HREF, u);
-                xhml.characters(u);
-                xhml.endElement(A);
+                if (u == null) {
+                    continue;
+                }
+                String trimmed = u.trim();
+                // Only emit http/https URLs; skip dangerous schemes such as javascript:, data:, etc.
+                String lower = trimmed.toLowerCase(Locale.ROOT);
+                if (lower.startsWith("http://") || lower.startsWith("https://")) {
+                    xhml.startElement(A, HREF, trimmed);
+                    xhml.characters(trimmed);
+                    xhml.endElement(A);
+                }
             }
             xhml.endElement(DIV);
         }
